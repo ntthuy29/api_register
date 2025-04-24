@@ -1,33 +1,29 @@
-import AuthService from './auth.service.js';
+import bcrypt from 'bcryptjs';
+import UserModel from '../../models/users.model.js';
 
-class AuthController {
-    async example(req,res){
-        try {
-            const userLogin = req.body;
-            const username = userLogin.name;
-            const password = userLogin.password;
-            console.log("username:", username);
-            const responseSer = await AuthService.example(username, password);
-            if (!example) 
-                return res.status(500).json({
-                    success: false,
-                    message: error.message
-                });
-            req.user = token;
-            
-            return res.status(200).json({
-                success: true,
-                // data: userLogin
-                data: token
-            });
-        } catch (error) {
-            console.log(error)
-            return res.status(401).json({
-                success: false,
-                message: error.message
-            });
-        }
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const userExists = await UserModel.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: 'Email đã tồn tại' });
     }
-}
 
-export default new AuthController();
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new UserModel({
+      name,
+      email,
+      password: hashedPassword,
+      createdAt: new Date().toISOString(),
+    });
+
+    await newUser.save();
+    return res.status(201).json({ message: 'Đăng ký thành công' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Đăng ký thất bại' });
+  }
+};
