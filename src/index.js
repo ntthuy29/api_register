@@ -13,6 +13,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 
+
 app.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
 });
