@@ -69,12 +69,29 @@ export const forgetPassword = async(req, res)=>{
  return res.status(400).json({message: "Không tìm thấy người dùng"});
 
     }
-    const transporter = nodemailer.createTransport(
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-    )
-  } catch{
-    
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Thay doi mat khau',
+      text: 'Click day de reset lai email babe!',
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Đã gửi mail thành công!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Gửi mail thất bại!' });
   }
+  
 
 
 
